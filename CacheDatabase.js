@@ -1,3 +1,5 @@
+const fs = require("fs")
+
 class CacheDatabase {
     constructor(dataDir = "./data") {
         this.dataDir = dataDir;
@@ -5,6 +7,7 @@ class CacheDatabase {
         this.vehicleHistory = new Map();
         this.lines = new Map();
         this.tripUpdates = new Map();
+        this.shifts = new Map();
 
         if (!fs.existsSync(dataDir)) {
             fs.mkdirSync(dataDir, { recursive: true });
@@ -16,6 +19,7 @@ class CacheDatabase {
     }
 
     addTrip(vehicleId, tripId, lineId, shiftId, startTimestamp) {
+        if(this.trips.get(tripId)) throw new Error("Duplicate entry");
         const tripMetadata = { vehicleId, lineId, startTimestamp, shiftId }
         const date = new Date(startTimestamp).toISOString().split('T')[0];
         tripMetadata.date = date;
@@ -29,10 +33,16 @@ class CacheDatabase {
         this.vehicleHistory.get(vehicleId).push(tripId);
 
         if(!this.lines.has(lineId)) {
-            this.lines.set(lineId, new Set());
+            this.lines.set(lineId, []);
         }
 
-        this.lines.get(lineId).add(tripId);
+        if(!this.shifts.has(shiftId)) {
+            this.shifts.set(shiftId, []);
+        }
+
+        this.lines.get(lineId).push(tripId);
+
+        this.shifts.get(shiftId).push(tripId);
 
         this.tripUpdates.set(tripId, []);
     }
@@ -59,6 +69,24 @@ class CacheDatabase {
             meta: this.trips.get(latestTripId),
             updates: this.tripUpdates.get(latestTripId) || null,
         }
+    }
+
+    getShiftTrips(shiftId) {
+        const tripIds = this.shifts.get(shiftId) || [];
+        return tripIds.map(tripId => ({
+            tripId,
+            meta: this.trips.get(tripId),
+            updates: this.tripUpdates.get(tripId),
+        }));;
+    }
+
+    getLineTrips(lineId) {
+        const tripIds = this.lines.get(lineId) || [];
+        return tripIds.map(tripId => ({
+            tripId,
+            meta: this.trips.get(tripId),
+            updates: this.tripUpdates.get(tripId),
+        }));;
     }
 
     offloadCompletedTrips() {

@@ -3,9 +3,9 @@ const WebSocket = require('ws');
 
 const DB = new Database();
 
-const wss = new WebSocket.Server({ port: 6000 });
+const ws = new WebSocket.Server({ port: 6000 });
 
-ws-on('connection', ws => {
+ws.on('connection', ws => {
     console.log('Client connected')
 
     ws.on('message', m => {
@@ -29,6 +29,14 @@ ws-on('connection', ws => {
                     const trip = DB.getLatestVehicleHistory(data.vehicleId);
                     ws.send(JSON.stringify({ status: 'success', data: trip }))
                     break;
+                case 'getShiftTrips':
+                    const shiftTrips = DB.getShiftTrips(data.shiftId);
+                    ws.send(JSON.stringify({ status: 'success', data: shiftTrips }))
+                    break;
+                case 'getLineTrips':
+                    const lineTrips = DB.getLineTrips(data.lineId);
+                    ws.send(JSON.stringify({ status: 'success', data: lineTrips }))
+                    break;
                 default:
                     ws.send(JSON.stringify({ status: 'error', message: 'Unknown type' }))
             }
@@ -39,3 +47,4 @@ ws-on('connection', ws => {
 
     ws.on('close', () => console.log('Client disconnected'))
 })
+
