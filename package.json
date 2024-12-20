@@ -1,0 +1,15 @@
+{
+  "name": "horarioslx-database",
+  "version": "1.0.0",
+  "description": "A node.js-based database, used in Horario LX's vehicle tracker backend",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}
