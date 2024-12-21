@@ -7,6 +7,7 @@ const ws = new WebSocket.Server({ port: 6000 });
 
 ws.on('connection', ws => {
     console.log('Client connected')
+    ws.send(JSON.stringify({ status: 'success' }))
 
     ws.on('message', m => {
         const { type, data } = JSON.parse(m)
@@ -36,6 +37,9 @@ ws.on('connection', ws => {
                 case 'getLineTrips':
                     const lineTrips = DB.getLineTrips(data.lineId);
                     ws.send(JSON.stringify({ status: 'success', data: lineTrips }))
+                    break;
+                case 'ping':
+                    ws.send(JSON.stringify({ status: 'success' }))
                     break;
                 default:
                     ws.send(JSON.stringify({ status: 'error', message: 'Unknown type' }))
